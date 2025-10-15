@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1/2チャレンジゲーム</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #e9f7ff;
+            border: 1px solid #b3e0ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            transition: background-color 0.3s, transform 0.1s;
+            color: white;
+            font-weight: bold;
+            flex-basis: 45%;
+        }
+        #choiceA {
+            background-color: #28a745; /* Green */
+        }
+        #choiceB {
+            background-color: #dc3545; /* Red */
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 20px;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>1/2 チャレンジゲーム 🎯</h1>
+    <p>どちらかのボタンを選んでください。当たれば次のステップへ進めますが、外れると最初からやり直しです！</p>
+
+    <div class="info-box">
+        <p>連続成功回数: <span id="successCount">0</span> 回</p>
+        <p>現在の連続成功確率: <span id="probability">100% (1/1)</span></p>
+    </div>
+
+    <div class="button-group">
+        <button id="choiceA">Aを選ぶ</button>
+        <button id="choiceB">Bを選ぶ</button>
+    </div>
+
+    <div id="message" class="message">ゲーム開始！挑戦者求む！</div>
+</div>
+
+<script>
+    let successCount = 0;
+    const successCountElement = document.getElementById('successCount');
+    const probabilityElement = document.getElementById('probability');
+    const messageElement = document.getElementById('message');
+    const choiceA = document.getElementById('choiceA');
+    const choiceB = document.getElementById('choiceB');
+
+    // 確率表示を更新する関数
+    function updateProbability() {
+        if (successCount === 0) {
+            probabilityElement.textContent = '100% (1/1)';
+        } else {
+            // 連続成功の確率は (1/2)^n です
+            const probDecimal = Math.pow(0.5, successCount);
+            // パーセンテージ表示 (小数点以下を8桁まで)
+            const probPercent = (probDecimal * 100).toFixed(8);
+            // 分数表示 (1/2^n)
+            const denominator = Math.pow(2, successCount);
+
+            probabilityElement.textContent = `${probPercent}% (1/${denominator})`;
+        }
+    }
+
+    // ゲームのロジック
+    function makeChoice(userChoice) {
+        // 1 (A) または 2 (B) のランダムな正解を生成
+        const correctAnswer = Math.floor(Math.random() * 2) + 1; // 1 or 2
+
+        // ユーザーが選んだ選択肢に対応する数値 (A: 1, B: 2)
+        const userChoiceNum = (userChoice === 'A') ? 1 : 2;
+
+        if (userChoiceNum === correctAnswer) {
+            // ✅ 正解
+            successCount++;
+            messageElement.className = 'message correct';
+            messageElement.textContent = `⭕ 正解！おめでとうございます！連続${successCount}回目！`;
+        } else {
+            // ❌ 不正解
+            const lostCount = successCount;
+            const lostProb = probabilityElement.textContent; // 失敗前の確率を取得
+
+            successCount = 0; // 最初からやり直し
+            messageElement.className = 'message incorrect';
+            messageElement.textContent = `❌ 残念！連続${lostCount}回でストップ (${lostProb}の確率でした)。最初からやり直しです。`;
+        }
+
+        updateProbability();
+        successCountElement.textContent = successCount;
+    }
+
+    // イベントリスナーの設定
+    choiceA.addEventListener('click', () => makeChoice('A'));
+    choiceB.addEventListener('click', () => makeChoice('B'));
+
+    // 初期表示の更新
+    updateProbability();
+
+</script>
+
+</body>
+</html>
